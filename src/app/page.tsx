@@ -2,50 +2,61 @@
 import { useMediaQuery } from "usehooks-ts";
 import MenuIcon from "@/assets/icons/menu.svg";
 import { useState } from "react";
-import classNames from "classnames";
+import ActivePage from "@/app/active/page";
+import LeaderboardPage from "@/app/leaderboard/page";
+import Tabs, { Tab } from "@/components/Tabs/tabs";
 
-enum Tabs {
-  active,
-  leaderboard,
-}
+const tabs: Tab[] = [
+  { name: "Active", value: "active" },
+  { name: "Leaderboard", value: "leaderboard" },
+];
 
-export default function Home() {
-  const [isActive, setIsActive] = useState(Tabs.active);
+export default function HomePage() {
+  const [currentTab, setCurrentTab] = useState("active");
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
+  const currentTabName = tabs.find((tab) => tab.value === currentTab)?.name;
+
+  const handleOpenMenu = () => {
+    setIsMenuOpen(true);
+  };
+
+  const handleCloseMenu = (newTab: string) => {
+    setIsMenuOpen(false);
+    setCurrentTab(newTab);
+  };
 
   return (
     <>
       {isDesktop ? (
         <div className="flex">
-          <div className="w-200 border-r-2 border-grey-500 h-dvh w-40 min-w-40 p-4">
-            <button
-              className={classNames(
-                isActive === Tabs.active && "font-bold",
-                "underline cursor-pointer hover:underline"
-              )}
-              onClick={() => setIsActive(Tabs.active)}
-            >
-              Active
-            </button>
-            <button
-              className={classNames(
-                isActive === Tabs.leaderboard && "font-bold",
-                "underline cursor-pointer hover:text-gray-700"
-              )}
-              onClick={() => setIsActive(Tabs.leaderboard)}
-            >
-              Leaderboard
-            </button>
-          </div>
-          <div className="h-dvh w-full p-4">Leaderboard</div>
+          <Tabs
+            tabs={tabs}
+            currentTab={currentTab}
+            setCurrentTab={setCurrentTab}
+          />
+          {currentTab === "active" && <ActivePage />}
+          {currentTab === "leaderboard" && <LeaderboardPage />}
         </div>
       ) : (
         <div className="flex flex-col md:flex-row">
           <div className="flex items-center gap-2 w-200 border-b-2 border-grey-500 p-2">
-            <MenuIcon className="w-6 h-6 fill-black cursor-pointer" />
-            <p className="font-bold underline">Active</p>
+            <MenuIcon
+              className="w-6 h-6 fill-black cursor-pointer"
+              onClick={handleOpenMenu}
+            />
+            <p className="font-bold underline">{currentTabName}</p>
           </div>
-          <div className="h-dvh w-full p-4">Leaderboard</div>
+          {currentTab === "active" && <ActivePage />}
+          {currentTab === "leaderboard" && <LeaderboardPage />}
+          {isMenuOpen && (
+            <Tabs
+              className="absolute bg-white"
+              tabs={tabs}
+              currentTab={currentTab}
+              setCurrentTab={handleCloseMenu}
+            />
+          )}
         </div>
       )}
     </>
